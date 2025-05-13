@@ -26,8 +26,12 @@ Este projeto é um **bot do Telegram** desenvolvido em Python que busca **coorde
 
 ## 📂 Estrutura do projeto
 
-🗃️ Coordenadas.db # Banco de dados SQLite com coordenadas
-🗃️ bot.ipynb # Código principal do bot
-🗃️ chave.py # Arquivo com a chave da API do Telegram
-🗃️ requirements.txt # Dependências do projeto
-🗃️ README.md # Este arquivo
+-🗃️ Coordenadas.db # Banco de dados SQLite com coordenadas
+-🗃️ bot.ipynb # Código principal do bot
+-🗃️ chave.py # Arquivo com a chave da API do Telegram
+-🗃️ requirements.txt # Dependências do projeto
+-🗃️ README.md # Este arquivo
+
+# 👨‍💻 Autores
+- Lenon Castro Torma
+- Rômulo Barreto da Silva
