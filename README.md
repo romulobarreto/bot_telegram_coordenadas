@@ -1,6 +1,8 @@
 # 🤖 Bot de Coordenadas CS – Norte e Sul 🌍
 
-Este projeto é um **bot do Telegram** desenvolvido em Python que busca **coordenadas geográficas (latitude e longitude)** com base no número da UC (Unidade Consumidora). Ele retorna o link direto do Google Maps com a localização correspondente.
+Este projeto é um **bot do Telegram** desenvolvido em Python que busca **coordenadas geográficas (latitude e longitude)** com base no número da UC (Unidade Consumidora). Ele retorna o link direto do Google Maps com a localização correspondente.  
+  
+Este bot foi criado para economizar tempo do time de backoffices, que antes, demoravam em média 3 minutos por atendimento, agora demoram 45 segundos, ou seja, um aumento de produtividade de 75%. Dessa forma, o time pode ajudar em outras demandas.
 
 ---
 
@@ -19,18 +21,25 @@ Este projeto é um **bot do Telegram** desenvolvido em Python que busca **coorde
 - Python 3
 - [PyTelegramBotAPI (telebot)](https://pypi.org/project/pyTelegramBotAPI/)
 - SQLite3
-- Pandas (para manipulação inicial dos CSVs)
-- VS Code (com extensão SQLite instalada)
 
 ---
 
 ## 📂 Estrutura do projeto
 
 -🗃️ Coordenadas.db # Banco de dados SQLite com coordenadas  
--🗃️ bot.ipynb # Código principal do bot  
+-🗃️ bot.py # Código principal do bot  
 -🗃️ chave.py # Arquivo com a chave da API do Telegram  
 -🗃️ requirements.txt # Dependências do projeto  
 -🗃️ README.md # Este arquivo  
+
+---
+
+## 🌍 Deploy
+
+- Plataforma é a PythonAnyWhere  
+- Bot rodando no plano free de 512mb de espaço  
+
+---
 
 # 👨‍💻 Autores
 - Lenon Castro Torma
