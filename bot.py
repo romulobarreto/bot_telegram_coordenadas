@@ -1,6 +1,7 @@
 import telebot
 import time
 import sqlite3
+import random
 import datetime
 from chave import *
 
@@ -36,7 +37,7 @@ def link(mensagem):
     
     if latitude is not None and longitude is not None:
         link = f'https://www.google.com/maps/search/?api=1&query={latitude},{longitude}'
-        bot.send_message(mensagem.chat.id, f"Segue o link de acordo com as coordenadas encontradas para a UC {numero} no sistema CS:\n \n {link}")
+        bot.send_message(mensagem.chat.id, f"Segue o link de acordo com as coordenadas encontradas para a UC {numero} no sistema CS:\n\n{link}")
     else:
         bot.send_message(mensagem.chat.id, f"UC {numero} não encontrada ou não possui coordenadas!")
 
@@ -60,35 +61,18 @@ Digite apenas os números da UC para obter o link no Google Maps.
 #Dica: Não use espaço e símbolos!
                  """)
 
-# Variável global para controle de tempo
-inicio_execucao = time.time()
-tempo_reinicio = 4 * 3600  # Reinicia a cada 4 horas (ajuste conforme necessário)
+# Início do controle principal
+def iniciar_bot():
+    print(f"Bot iniciado em {datetime.datetime.now()}")
 
-print(f"Bot iniciado em {datetime.datetime.now()}")
+    while True:
+        try:
+            bot.polling(none_stop=False, timeout=60)
+        except Exception as e:
+            print(f"Erro durante execução: {e}")
+            espera = min(300, 5 + random.randint(1, 30))  # espera entre 6 e 35s
+            print(f"Aguardando {espera} segundos antes de tentar novamente...")
+            time.sleep(espera)
 
-while True:
-    try:
-        # Verifica se é hora de reiniciar
-        tempo_atual = time.time()
-        tempo_decorrido = tempo_atual - inicio_execucao
-        
-        if tempo_decorrido >= tempo_reinicio:
-            print(f"Reinício programado após {tempo_decorrido/3600:.2f} horas de execução - {datetime.datetime.now()}")
-            # Força uma exceção para reiniciar o loop
-            raise Exception("Reinício programado")
-        
-        # Tempo restante até o próximo reinício
-        tempo_restante = tempo_reinicio - tempo_decorrido
-        print(f"Bot em execução. Próximo reinício em {tempo_restante/3600:.2f} horas - {datetime.datetime.now()}")
-        
-        # Executa o polling por um período limitado e depois verifica o tempo novamente
-        bot.polling(none_stop=True, timeout=60)
-        
-    except Exception as e:
-        if str(e) == "Reinício programado":
-            print("Reiniciando o bot conforme programado...")
-            inicio_execucao = time.time()  # Reseta o tempo de execução
-            time.sleep(1)  # Pequena pausa antes de reiniciar
-        else:
-            print(f"Erro na conexão: {e}")
-            time.sleep(5)  # Espera 5 segundos antes de tentar novamente
+if __name__ == '__main__':
+    iniciar_bot()
