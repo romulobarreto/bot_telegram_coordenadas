@@ -1,8 +1,7 @@
 Coordenadas.db
-chave.py
-norte.csv
-norte2.csv
-sul.csv
-criardb.py
+token_bot.py
 venv
 __pycache__
+/tabelas
+/database
+/criacao
