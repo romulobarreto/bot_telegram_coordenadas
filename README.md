@@ -41,6 +41,7 @@ Este bot foi criado para economizar tempo do time de backoffices, que antes, dem
 
 ---
 
-# 👨‍💻 Autores
+# 👨‍💻 Autores  
+- Breno Lucas Tomé Domingues
 - Lenon Castro Torma
 - Rômulo Barreto da Silva
