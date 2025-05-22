@@ -2,7 +2,8 @@ import sqlite3
 from models.uc import UC
 
 class UCDao:
-    def buscar_uc(numero: str) -> UC | None:
+    @staticmethod
+    def buscar_uc(numero: str) -> tuple[bool, str]:
         conn = sqlite3.connect("database/uc.db")
         cursor = conn.cursor()
 
@@ -24,6 +25,3 @@ class UCDao:
             return True, UC(numero=numero, latitude=latitude, longitude=longitude)
         else:
             return False, "⚠️ UC incorreta ou não possui coordenadas cadastradas no banco."
-       
-        
-        
