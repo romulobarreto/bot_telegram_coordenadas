@@ -282,7 +282,7 @@ def processar_numero(message):
 def fallback(message):
     bot.send_message(
         message.chat.id,
-        "❗Digite apenas o número ou selecione uma opção no /menu",
+        "❗Selecione uma das opções no meu menu. Aperte: /menu",
         reply_markup=teclado_opcoes()
     )
 
