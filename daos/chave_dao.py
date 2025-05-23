@@ -1,27 +1,34 @@
 import sqlite3
+import os
 from models.chave import Chave
 
 class ChaveDao:
     @staticmethod
     def buscar_chave(numero: str) -> tuple[bool, str]:
-        conn = sqlite3.connect("database/chave.db")
-        cursor = conn.cursor()
+        try:
+            BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+            db_path = os.path.join(BASE_DIR, "..", "database", "chave.db")
 
-        cursor.execute("""
-        SELECT 
-            LATITUDE,
-            LONGITUDE
-        FROM 
-            CHAVE
-        WHERE 
-            CHAVE = ?
-        """, (numero,))
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
 
-        resultado = cursor.fetchone()
-        conn.close()
+            cursor.execute("""
+            SELECT 
+                LATITUDE,
+                LONGITUDE
+            FROM 
+                CHAVE
+            WHERE 
+                CHAVE = ?
+            """, (numero,))
 
-        if resultado:
-            latitude, longitude = resultado
-            return True, Chave(numero=numero, latitude=latitude, longitude=longitude)
-        else:
-            return False, "⚠️ Chave incorreta ou não possui coordenadas cadastradas no banco."  
+            resultado = cursor.fetchone()
+            conn.close()
+
+            if resultado:
+                latitude, longitude = resultado
+                return True, Chave(numero=numero, latitude=latitude, longitude=longitude)
+            else:
+                return False, "⚠️ Chave incorreta ou não possui coordenadas cadastradas no banco."  
+        except Exception as e:
+            return False, f"❌ Erro ao acessar o banco: {str(e)}"
