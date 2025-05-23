@@ -1,6 +1,9 @@
 import telebot
+import json
 import time
 import random
+import os
+from datetime import datetime
 from telebot.types import BotCommand, ReplyKeyboardMarkup, KeyboardButton
 from token_bot import token
 from controllers.controller import gerador_coordenada
@@ -13,6 +16,25 @@ bot = telebot.TeleBot(token)
 
 # 🔥 Armazena o contexto do usuário
 contexto_usuario = {}
+
+# 📊 Função para registrar contagem
+def registrar_consulta(tipo):
+    data_hoje = datetime.now().strftime('%Y-%m-%d')
+    caminho = 'contagem.json'
+
+    if os.path.exists(caminho):
+        with open(caminho, 'r') as file:
+            contagem = json.load(file)
+    else:
+        contagem = {}
+
+    if data_hoje not in contagem:
+        contagem[data_hoje] = {"UC": 0, "POSTE": 0, "CHAVE": 0, "TRAFO": 0}
+
+    contagem[data_hoje][tipo] += 1
+
+    with open(caminho, 'w') as file:
+        json.dump(contagem, file, indent=4)
 
 # ✅ Menu fixo no chat
 bot.set_my_commands([
@@ -247,6 +269,9 @@ def processar_numero(message):
         bot.send_message(message.chat.id, f"📍 Coordenadas encontradas:\n{resultado}")
     else:
         bot.send_message(message.chat.id, f"❌ {resultado}")
+
+    # 🔢 Atualiza contagem
+    registrar_consulta(contexto)
 
     # 🔄 Limpa o contexto após responder
     contexto_usuario.pop(message.chat.id, None)
