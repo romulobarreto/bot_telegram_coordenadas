@@ -33,6 +33,12 @@ Este bot foi criado para economizar tempo do time de backoffices, que antes, dem
 - `trafo.py`: Classe Trafo
 - `uc.py`: Classe UC
 
+### 📂 Database
+- `chave.db`: Banco de chaves
+- `poste.db`: Banco de postes
+- `trafo.db`: Banco de transformadores
+- `uc.db`: Banco de UCs
+
 ### 📂 Daos
 - `chave_dao.py`: Realiza a busca da chave no banco
 - `poste_dao.py`: Realiza a busca do poste no banco
