@@ -4,7 +4,7 @@ from models.trafo import Trafo
 
 class TrafoDao:
     @staticmethod
-    def buscar_trafo(numero: str) -> tuple[bool, str]:
+    def buscar_trafo(numero: str) -> tuple[bool, str | Trafo]:
         try:
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             db_path = os.path.join(BASE_DIR, "..", "database", "trafo.db")

@@ -5,3 +5,4 @@ __pycache__
 /tabelas
 /database
 /criacao
+mypy.ini

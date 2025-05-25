@@ -4,7 +4,7 @@ import time
 import random
 import os
 from datetime import datetime
-from telebot.types import BotCommand, ReplyKeyboardMarkup, KeyboardButton
+from telebot.types import BotCommand, ReplyKeyboardMarkup, KeyboardButton, Message 
 from token_bot import token
 from controllers.controller import gerador_coordenada
 from daos.uc_dao import UCDao
@@ -18,7 +18,7 @@ bot = telebot.TeleBot(token)
 contexto_usuario = {}
 
 # 📊 Função para registrar contagem
-def registrar_consulta(tipo):
+def registrar_consulta(tipo: str) -> None:
     data_hoje = datetime.now().strftime('%Y-%m-%d')
     caminho = 'contagem.json'
 
@@ -42,7 +42,7 @@ bot.set_my_commands([
 ])
 
 # ✅ Cria o teclado com botões
-def teclado_opcoes():
+def teclado_opcoes() -> ReplyKeyboardMarkup:
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(
         KeyboardButton('🔌 UC'),
@@ -54,8 +54,8 @@ def teclado_opcoes():
 
 
 # 🚀 Comando menu
-@bot.message_handler(commands=['menu', 'start'])
-def menu(message):
+@bot.message_handler(commands=['menu', 'start']) # type: ignore
+def menu(message: Message) -> None:
     bot.send_message(
         message.chat.id,
         f"👋 Olá, {message.from_user.first_name}!\nEscolha uma das opções abaixo:",
@@ -64,8 +64,8 @@ def menu(message):
 
 
 # 🔘 Quando clica numa opção do menu
-@bot.message_handler(func=lambda m: m.text in ['🔌 UC', '🔑 Chave', '🗼 Poste', '⚡ Transformador'])
-def escolher_busca(message):
+@bot.message_handler(func=lambda m: m.text in ['🔌 UC', '🔑 Chave', '🗼 Poste', '⚡ Transformador']) # type: ignore
+def escolher_busca(message: Message) -> None:
     if message.text == '🔌 UC':
         contexto_usuario[message.chat.id] = 'UC'
         bot.send_message(message.chat.id, "🔢 Informe o número da UC:")
@@ -245,8 +245,8 @@ Se a cidade é *Alvorada* e a placa tem o número *465*, então o número do tra
 
 
 # 🔍 Processa o número informado
-@bot.message_handler(func=lambda m: m.text.isdigit())
-def processar_numero(message):
+@bot.message_handler(func=lambda m: m.text.isdigit()) # type: ignore
+def processar_numero(message: Message) -> None:
     contexto = contexto_usuario.get(message.chat.id)
 
     if contexto == 'UC':
@@ -278,8 +278,8 @@ def processar_numero(message):
 
 
 # ❌ Mensagem padrão para qualquer coisa fora do fluxo
-@bot.message_handler(func=lambda m: True)
-def fallback(message):
+@bot.message_handler(func=lambda m: True) # type: ignore
+def fallback(message: Message) -> None:
     bot.send_message(
         message.chat.id,
         "❗Selecione uma das opções no meu menu. Aperte: /menu",
@@ -288,8 +288,8 @@ def fallback(message):
 
 
 # 🔄 Inicialização robusta
-def iniciar_bot():
-    print(f"🚀 Bot iniciado e rodando...")
+def iniciar_bot()-> None:
+    print("🚀 Bot iniciado e rodando...")
     while True:
         try:
             bot.polling(none_stop=True, timeout=60)

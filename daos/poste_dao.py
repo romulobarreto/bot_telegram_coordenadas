@@ -4,7 +4,7 @@ from models.poste import Poste
 
 class PosteDao:
     @staticmethod
-    def buscar_poste(numero: str) -> tuple[bool, str]:
+    def buscar_poste(numero: str) -> tuple[bool, str | Poste]:
         try:
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             db_path = os.path.join(BASE_DIR, "..", "database", "poste.db")
