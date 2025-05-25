@@ -27,8 +27,11 @@ class ChaveDao:
 
             if resultado:
                 latitude, longitude = resultado
-                return True, Chave(numero=numero, latitude=latitude, longitude=longitude)
+                if latitude is None and longitude is None:
+                    return False, "⚠️ CHAVE sem coordenadas cadastradas."
+                else:
+                    return True, Chave(numero=numero, latitude=latitude, longitude=longitude)
             else:
-                return False, "⚠️ Chave incorreta ou não possui coordenadas cadastradas no banco."  
+                return False, "⚠️ CHAVE incorreta."  
         except Exception as e:
             return False, f"❌ Erro ao acessar o banco: {str(e)}"

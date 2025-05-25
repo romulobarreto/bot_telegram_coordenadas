@@ -27,8 +27,11 @@ class PosteDao:
 
             if resultado:
                 latitude, longitude = resultado
-                return True, Poste(numero=numero, latitude=latitude, longitude=longitude)
+                if latitude is None and longitude is None:
+                    return False, "⚠️ POSTE sem coordenadas cadastradas."
+                else:
+                    return True, Poste(numero=numero, latitude=latitude, longitude=longitude)
             else:
-                return False, "⚠️ Poste incorreto ou não possui coordenadas cadastradas no banco."
+                return False, "⚠️ Poste incorreto."
         except Exception as e:
             return False, f"❌ Erro ao acessar o banco: {str(e)}"

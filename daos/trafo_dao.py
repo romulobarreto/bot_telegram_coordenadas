@@ -27,8 +27,10 @@ class TrafoDao:
 
             if resultado:
                 latitude, longitude = resultado
+                if latitude is None and longitude is None:
+                    return False, "⚠️ TRAFO sem coordenadas cadastradas."
                 return True, Trafo(numero=numero, latitude=latitude, longitude=longitude)
             else:
-                return False, "⚠️ Transformador incorreto ou não possui coordenadas cadastradas no banco."
+                return False, "⚠️ TRAFO incorreto."
         except Exception as e:
             return False, f"❌ Erro ao acessar o banco: {str(e)}"

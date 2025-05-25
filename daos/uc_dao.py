@@ -21,8 +21,11 @@ class UCDao:
 
             if resultado:
                 latitude, longitude = resultado
-                return True, UC(numero=numero, latitude=latitude, longitude=longitude)
+                if latitude is None and longitude is None:
+                    return False, "⚠️ UC sem coordenadas cadastradas."
+                else:
+                    return True, UC(numero=numero, latitude=latitude, longitude=longitude)
             else:
-                return False, "⚠️ UC incorreta ou não possui coordenadas cadastradas no banco."
+                return False, "⚠️ UC incorreta."
         except Exception as e:
             return False, f"❌ Erro ao acessar o banco: {str(e)}"
