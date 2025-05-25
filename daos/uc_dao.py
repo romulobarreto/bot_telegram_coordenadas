@@ -4,7 +4,7 @@ from models.uc import UC
 
 class UCDao:
     @staticmethod
-    def buscar_uc(numero: str) -> tuple[bool, str]:
+    def buscar_uc(numero: str) -> tuple[bool, str | UC]:
         try:
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             db_path = os.path.join(BASE_DIR, "..", "database", "uc.db")

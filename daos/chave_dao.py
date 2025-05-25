@@ -4,7 +4,7 @@ from models.chave import Chave
 
 class ChaveDao:
     @staticmethod
-    def buscar_chave(numero: str) -> tuple[bool, str]:
+    def buscar_chave(numero: str) -> tuple[bool, str | Chave]:
         try:
             BASE_DIR = os.path.dirname(os.path.abspath(__file__))
             db_path = os.path.join(BASE_DIR, "..", "database", "chave.db")
