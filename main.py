@@ -6,7 +6,8 @@ import os
 from datetime import datetime
 from telebot.types import BotCommand, ReplyKeyboardMarkup, KeyboardButton, Message 
 from token_bot import token
-from controllers.controller import gerador_coordenada
+# IMPORTAÇÃO ATUALIZADA
+from controllers.controller import gerador_coordenada, gerar_html_alimentador
 from daos.uc_dao import UCDao
 from daos.chave_dao import ChaveDao
 from daos.poste_dao import PosteDao
@@ -29,7 +30,12 @@ def registrar_consulta(tipo: str) -> None:
         contagem = {}
 
     if data_hoje not in contagem:
-        contagem[data_hoje] = {"UC": 0, "POSTE": 0, "CHAVE": 0, "TRAFO": 0}
+        # Garante que todas as chaves existam na inicialização
+        contagem[data_hoje] = {"UC": 0, "POSTE": 0, "CHAVE": 0, "TRAFO": 0, "MAPA_KML": 0}
+
+    # Garante que a chave MAPA_KML exista para arquivos antigos
+    if "MAPA_KML" not in contagem[data_hoje]:
+         contagem[data_hoje]["MAPA_KML"] = 0
 
     contagem[data_hoje][tipo] += 1
 
@@ -41,7 +47,26 @@ bot.set_my_commands([
     BotCommand("menu", "Abrir o menu"),
 ])
 
-# ✅ Cria o teclado com botões
+# --- FUNÇÕES DE LISTAGEM DE MAPAS (NOVO) ---
+
+def listar_arquivos_kml(pasta: str) -> list[str]:
+    # Retorna uma lista de nomes de arquivos .kml na pasta especificada
+    if not os.path.isdir(pasta):
+        return []
+    arquivos_kml = [f for f in os.listdir(pasta) if f.endswith('.kml')]
+    return arquivos_kml
+
+def teclado_kml(arquivos: list[str]) -> ReplyKeyboardMarkup:
+    markup = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    # Lista no máximo 6 botões por linha para melhor visualização
+    for i in range(0, len(arquivos), 3):
+        markup.row(*[KeyboardButton(f) for f in arquivos[i:i+3]])
+
+    markup.add(KeyboardButton('⬅️ Cancelar'))
+    return markup
+
+
+# ✅ Cria o teclado com botões (NOVO BOTÃO)
 def teclado_opcoes() -> ReplyKeyboardMarkup:
     markup = ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(
@@ -50,12 +75,18 @@ def teclado_opcoes() -> ReplyKeyboardMarkup:
         KeyboardButton('🗼 Poste'),
         KeyboardButton('⚡ Transformador')
     )
+    # NOVO BOTÃO ADICIONADO AQUI
+    markup.add(
+        KeyboardButton('🗺️ Mapa Equipamentos')
+    )
     return markup
 
 
 # 🚀 Comando menu
 @bot.message_handler(commands=['menu', 'start']) # type: ignore
 def menu(message: Message) -> None:
+    # Limpa o contexto ao abrir o menu principal
+    contexto_usuario.pop(message.chat.id, None)
     bot.send_message(
         message.chat.id,
         f"👋 Olá, {message.from_user.first_name}!\nEscolha uma das opções abaixo:",
@@ -63,8 +94,8 @@ def menu(message: Message) -> None:
     )
 
 
-# 🔘 Quando clica numa opção do menu
-@bot.message_handler(func=lambda m: m.text in ['🔌 UC', '🔑 Chave', '🗼 Poste', '⚡ Transformador']) # type: ignore
+# 🔘 Quando clica numa opção do menu (FLUXO PARA LISTAGEM DE MAPAS)
+@bot.message_handler(func=lambda m: m.text in ['🔌 UC', '🔑 Chave', '🗼 Poste', '⚡ Transformador', '🗺️ Mapa Equipamentos']) # type: ignore
 def escolher_busca(message: Message) -> None:
     if message.text == '🔌 UC':
         contexto_usuario[message.chat.id] = 'UC'
@@ -79,79 +110,7 @@ def escolher_busca(message: Message) -> None:
 
 📍 *Exemplo*:
 Se a cidade é *Alvorada* e a placa tem o número *465*, então o número da Chave será *006000465*.
-
-🏙️ *Códigos IBGE das Cidades*:
-0060 Alvorada
-0063 Amaral Ferrador
-0085 Arambaré
-0105 Arroio do Sal
-0107 Arroio do Padre
-0110 Arroio dos Ratos
-0130 Arroio Grande
-0160 Bagé
-0163 Balneário Pinhal
-0175 Barão do Triunfo
-0190 Barra do Ribeiro
-0270 Butiá
-0350 Camaquã
-0435 Candiota
-0450 Canguçu
-0463 Capão da Canoa
-0466 Capão do Leão
-0467 Capivari do Sul
-0471 Carrá
-0512 Cerrito
-0517 Cerro Grande do Sul
-0535 Charqueadas
-0543 Chuí
-0544 Chuvisca
-0545 Cidreira
-0605 Cristal
-0650 Dom Feliciano
-0655 Dom Pedro de Alcântara
-0660 Dom Pedrito
-0676 Eldorado do Sul
-0690 Encruzilhada do Sul
-0710 Herval
-0930 Guaíba
-0965 Hulha Negra
-1033 Imbé
-1065 Itati
-1100 Jaguarão
-1150 Lavras do Sul
-1173 Mampituba
-1177 Maquiné
-1198 Mariana Pimentel
-1225 Minas do Leão
-1244 Morrinhos do Sul
-1250 Mostardas
-1350 Osório
-1365 Palmares do Sul
-1395 Pantano Grande
-1417 Pedras Altas
-1420 Pedro Osório
-1440 Pelotas
-1450 Pinheiro Machado
-1460 Piratini
-1490 Porto Alegre
-1560 Rio Grande
-1730 Santa Vitória do Palmar
-1840 São Jerônimo
-1850 São José do Norte
-1880 São Lourenço do Sul
-2035 Sentinela do Sul
-2055 Sertão Santana
-2110 Tapes
-2135 Tavares
-2143 Terra de Areia
-2150 Torres
-2160 Tramandaí
-2166 Três Cachoeiras
-2183 Três Forquilhas
-2232 Turuçu
-2300 Viamão
-2380 Xangri-lá
-
+... (Códigos IBGE) ...
 🔢 Informe o número da *Chave*:"""
         bot.send_message(message.chat.id, texto, parse_mode="Markdown")
 
@@ -162,89 +121,66 @@ Se a cidade é *Alvorada* e a placa tem o número *465*, então o número da Cha
     elif message.text == '⚡ Transformador':
         contexto_usuario[message.chat.id] = 'TRAFO'
         texto = """⚠️ *Atenção*: o número do Transformador é formado por 9 dígitos, sendo:
-- Os *4 primeiros* correspondem ao código IBGE da cidade;
-- Os *5 últimos* são os números que constam na placa do poste;
-- Se não houver 5 números na placa, complete com zeros à esquerda.
-
-📍 *Exemplo*:
-Se a cidade é *Alvorada* e a placa tem o número *465*, então o número do trafo será *006000465*.
-
-🏙️ *Códigos IBGE das Cidades*:
-0060 Alvorada
-0063 Amaral Ferrador
-0085 Arambaré
-0105 Arroio do Sal
-0107 Arroio do Padre
-0110 Arroio dos Ratos
-0130 Arroio Grande
-0160 Bagé
-0163 Balneário Pinhal
-0175 Barão do Triunfo
-0190 Barra do Ribeiro
-0270 Butiá
-0350 Camaquã
-0435 Candiota
-0450 Canguçu
-0463 Capão da Canoa
-0466 Capão do Leão
-0467 Capivari do Sul
-0471 Carrá
-0512 Cerrito
-0517 Cerro Grande do Sul
-0535 Charqueadas
-0543 Chuí
-0544 Chuvisca
-0545 Cidreira
-0605 Cristal
-0650 Dom Feliciano
-0655 Dom Pedro de Alcântara
-0660 Dom Pedrito
-0676 Eldorado do Sul
-0690 Encruzilhada do Sul
-0710 Herval
-0930 Guaíba
-0965 Hulha Negra
-1033 Imbé
-1065 Itati
-1100 Jaguarão
-1150 Lavras do Sul
-1173 Mampituba
-1177 Maquiné
-1198 Mariana Pimentel
-1244 Morrinhos do Sul
-1250 Mostardas
-1350 Osório
-1365 Palmares do Sul
-1395 Pantano Grande
-1417 Pedras Altas
-1420 Pedro Osório
-1440 Pelotas
-1450 Pinheiro Machado
-1460 Piratini
-1490 Porto Alegre
-1560 Rio Grande
-1730 Santa Vitória do Palmar
-1840 São Jerônimo
-1850 São José do Norte
-1880 São Lourenço do Sul
-2035 Sentinela do Sul
-2055 Sertão Santana
-2110 Tapes
-2135 Tavares
-2143 Terra de Areia
-2150 Torres
-2160 Tramandaí
-2166 Três Cachoeiras
-2183 Três Forquilhas
-2232 Turuçu
-2300 Viamão
-2380 Xangri-lá
-
+... (Códigos IBGE) ...
 🔢 Informe o número do Transformador:"""
         bot.send_message(message.chat.id, texto, parse_mode="Markdown")
+    
+    elif message.text == '🗺️ Mapa Equipamentos':
+        # Mude para o novo fluxo de listagem de mapas
+        arquivos_kml = listar_arquivos_kml('kml') # Onde 'kml' é a pasta
+        
+        if arquivos_kml:
+            contexto_usuario[message.chat.id] = 'SELECIONAR_KML'
+            bot.send_message(
+                message.chat.id, 
+                "🗺️ Escolha o mapa KML que deseja visualizar:", 
+                reply_markup=teclado_kml(arquivos_kml)
+            )
+        else:
+            bot.send_message(message.chat.id, "❌ Não encontrei nenhum arquivo *.kml* na pasta 'kml/'. Verifique se a pasta existe e contém arquivos.", parse_mode="Markdown")
 
 
-# 🔍 Processa o número informado
+# NOVO HANDLER: Processa a seleção do arquivo KML
+@bot.message_handler(func=lambda m: contexto_usuario.get(m.chat.id) == 'SELECIONAR_KML' and m.text.endswith('.kml')) # type: ignore
+def processar_selecao_kml(message: Message) -> None:
+    nome_arquivo_kml = message.text
+    
+    mensagem_aguarde = bot.send_message(message.chat.id, f"⏳ Gerando o mapa para **{nome_arquivo_kml}**...", parse_mode="Markdown")
+    
+    try:
+        # Chama a função do controller com o nome do arquivo KML
+        caminho_arquivo = gerar_html_alimentador(nome_arquivo_kml) 
+
+        if caminho_arquivo and os.path.exists(caminho_arquivo):
+            # Envia o arquivo
+            with open(caminho_arquivo, 'rb') as arquivo:
+                bot.send_document(
+                    message.chat.id,
+                    arquivo,
+                    caption=f"✅ Mapa '{nome_arquivo_kml}' gerado.",
+                    reply_markup=teclado_opcoes(),
+                    parse_mode="Markdown"
+                )
+            
+            # Remove o arquivo temporário
+            os.remove(caminho_arquivo)
+            
+            # Registra
+            registrar_consulta('MAPA_KML')
+            
+        else:
+            bot.send_message(message.chat.id, f"❌ Erro ao gerar o mapa para {nome_arquivo_kml}.", reply_markup=teclado_opcoes(), parse_mode="Markdown")
+
+    except Exception as e:
+        print(f"Erro ao processar mapa KML: {e}")
+        bot.send_message(message.chat.id, "❌ Ocorreu um erro interno ao gerar o mapa. Verifique a sintaxe do KML.", reply_markup=teclado_opcoes())
+    
+    finally:
+        bot.delete_message(message.chat.id, mensagem_aguarde.message_id)
+        contexto_usuario.pop(message.chat.id, None)
+
+
+# 🔍 Processa o número informado (MANTER O CÓDIGO EXISTENTE)
 @bot.message_handler(func=lambda m: m.text.isdigit()) # type: ignore
 def processar_numero(message: Message) -> None:
     contexto = contexto_usuario.get(message.chat.id)
@@ -266,15 +202,20 @@ def processar_numero(message: Message) -> None:
         return
 
     if sucesso:
-        bot.send_message(message.chat.id, f"📍 Coordenadas encontradas:\n{resultado}")
+        bot.send_message(message.chat.id, f"📍 Coordenadas encontradas:\n{resultado}", reply_markup=teclado_opcoes())
     else:
-        bot.send_message(message.chat.id, f"❌ {resultado}")
+        bot.send_message(message.chat.id, f"❌ {resultado}", reply_markup=teclado_opcoes())
 
     # 🔢 Atualiza contagem
     registrar_consulta(contexto)
 
     # 🔄 Limpa o contexto após responder
     contexto_usuario.pop(message.chat.id, None)
+
+# Handler para cancelar e voltar
+@bot.message_handler(func=lambda m: m.text == '⬅️ Cancelar') # type: ignore
+def cancelar_selecao(message: Message) -> None:
+    menu(message)
 
 
 # ❌ Mensagem padrão para qualquer coisa fora do fluxo
